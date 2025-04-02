@@ -113,7 +113,6 @@ public class DatabaseManager {
                     plugin.getLogger().log(Level.SEVERE, "Ошибка отката транзакции", rollbackEx);
                 }
             } finally {
-                // Выполнить callback в основном потоке
                 Bukkit.getScheduler().runTask(plugin, callback);
             }
         });

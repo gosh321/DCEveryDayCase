@@ -47,7 +47,7 @@ public final class DCEveryDayCaseAddon extends InternalJavaAddon implements Dail
         int keysAmount = config.getKeysAmount();
         boolean debug = config.isDebug();
 
-        dailyCaseService = new DailyCaseService(donateCasePlugin, DCAPI.getInstance(), lastClaimTimes,
+        dailyCaseService = new DailyCaseService(donateCasePlugin, this, DCAPI.getInstance(), lastClaimTimes,
                 claimCooldown, caseName, keysAmount, debug);
         initialized = true;
     }
@@ -65,13 +65,12 @@ public final class DCEveryDayCaseAddon extends InternalJavaAddon implements Dail
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(dailyCaseService, caseName), donateCasePlugin);
 
         // Регистрируем плейсхолдер
-        DCEveryDayCaseExpansion expansion = new DCEveryDayCaseExpansion(this, donateCasePlugin);
+        DCEveryDayCaseExpansion expansion = new DCEveryDayCaseExpansion(this);
         if (expansion.register()) {
             logger.info("Placeholder expansion успешно зарегистрирован!");
         } else {
             logger.warning("Ошибка регистрации Placeholder expansion!");
         }
-        dailyCaseService.startScheduler();
     }
 
     @Override
@@ -93,6 +92,11 @@ public final class DCEveryDayCaseAddon extends InternalJavaAddon implements Dail
     public DCAPI getDCAPI() {
         return DCAPI.getInstance();
     }
+
+    public Config getConfigInstance() {
+        return new Config(this);
+    }
+
 
     @Override
     public DailyCaseService getDailyCaseService() {

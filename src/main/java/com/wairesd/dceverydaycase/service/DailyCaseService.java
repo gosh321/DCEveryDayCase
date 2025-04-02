@@ -1,8 +1,11 @@
 package com.wairesd.dceverydaycase.service;
 
 import com.jodexindustries.donatecase.api.DCAPI;
+import com.wairesd.dceverydaycase.DCEveryDayCaseAddon;
 import com.wairesd.dceverydaycase.db.DatabaseManager;
+import com.wairesd.dceverydaycase.tools.Config;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -23,10 +26,14 @@ public class DailyCaseService {
     private final boolean debug;
     private BukkitRunnable schedulerTask;
     private final Logger logger;
+    private final DCEveryDayCaseAddon addon;
 
-    public DailyCaseService(JavaPlugin plugin, DCAPI dcapi, Map<String, Long> nextClaimTimes,
-                            long claimCooldown, String caseName, int keysAmount, boolean debug) {
-        this.plugin = plugin;
+
+    public DailyCaseService(JavaPlugin schedulerPlugin, DCEveryDayCaseAddon addon, DCAPI dcapi,
+                            Map<String, Long> nextClaimTimes, long claimCooldown,
+                            String caseName, int keysAmount, boolean debug) {
+        this.plugin = schedulerPlugin;
+        this.addon = addon;
         this.dcapi = dcapi;
         this.nextClaimTimes = nextClaimTimes;
         this.claimCooldown = claimCooldown;
@@ -35,6 +42,7 @@ public class DailyCaseService {
         this.debug = debug;
         this.logger = plugin.getLogger();
     }
+
 
     /** Запускает планировщик, проверяющий статус игроков каждую секунду */
     public void startScheduler() {
@@ -64,12 +72,22 @@ public class DailyCaseService {
         }
     }
 
-    /** Выдаёт ключ игроку с помощью консольной команды DonateCase */
+    /** Выдаёт ключ игроку с помощью консольной команды DonateCase и логирует сообщение согласно config */
     public void giveGift(Player player) {
-        String command = "dc givekey " + player.getName() + " " + caseName + " " + keysAmount + (debug ? " -s" : "");
+        String command = "dc givekey " + player.getName() + " " + caseName + " " + keysAmount + " -s";
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-        if (debug)
-            logger.info("Выдан " + keysAmount + " ключ(ей) игроку " + player.getName() + " для кейса " + caseName);
+
+        Config myConfig = new Config(addon);
+        String messageTemplate = myConfig.getLogConsoleGiveKeyMessage();
+
+        String message = messageTemplate
+                .replace("{key}", String.valueOf(keysAmount))
+                .replace("{player}", player.getName())
+                .replace("{case}", caseName);
+
+        if (debug) {
+            logger.info(message);
+        }
     }
 
     /** Обновляет время следующего получения ключа для игрока */

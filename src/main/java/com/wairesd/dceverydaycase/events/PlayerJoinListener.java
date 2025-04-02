@@ -25,7 +25,6 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
         if (!service.getNextClaimTimes().containsKey(player.getName())) {
             service.giveGift(player);
-            // Запись не сохраняется, чтобы при следующем открытии кейса запускался таймер
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.wairesd.dceverydaycase.tools;
 
+import com.wairesd.dceverydaycase.DCEveryDayCaseAddon;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,11 +15,13 @@ public class DCEveryDayCaseExpansion extends PlaceholderExpansion {
     private final String placeholderAvailable;
     private final String placeholderRemaining;
 
-    public DCEveryDayCaseExpansion(DailyCasePlugin plugin, JavaPlugin javaPlugin) {
+    public DCEveryDayCaseExpansion(DailyCasePlugin plugin) {
         this.plugin = plugin;
-        placeholderAvailable = javaPlugin.getConfig().getString("placeholder.available", "Доступен ежедневный кейс: нажмите для получения");
-        placeholderRemaining = javaPlugin.getConfig().getString("placeholder.remaining", "До получения осталось: $d дн, $h ч, $m мин, $s сек");
+        Config config = ((DCEveryDayCaseAddon) plugin).getConfigInstance();
+        placeholderAvailable = config.getPlaceholderAvailable();
+        placeholderRemaining = config.getPlaceholderRemaining();
     }
+
 
     @Override
     public String getIdentifier() {
@@ -41,7 +44,10 @@ public class DCEveryDayCaseExpansion extends PlaceholderExpansion {
     @Override
     public String onPlaceholderRequest(Player player, String params) {
         if (!"remaining_time".equalsIgnoreCase(params)) return "";
-        if (player == null) return "Информация доступна только для игроков";
+        if (player == null) {
+            String infoPlaceholder = ((DCEveryDayCaseAddon) plugin).getConfigInstance().getInfoPlaceholder();
+            return infoPlaceholder;
+        }
 
         DailyCaseService service = plugin.getDailyCaseService();
         DCAPI dcapi = plugin.getDCAPI();
